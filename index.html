@@ -925,35 +925,42 @@
     </section>
 
     <!-- RSVP -->
-    <section id="rsvp">
+    <!-- RSVP -->
+<section id="rsvp">
         <div class="rsvp-wrapper reveal">
             <div class="text-center" style="margin-bottom: 50px;">
                 <div class="section-label">Подтверждение</div>
                 <h2 class="section-title" style="text-align: center;">Придёте?</h2>
-                <p class="section-subtitle" style="text-align: center; margin: 0 auto;">Заполните форму до 22 июля</p>
+                <p class="section-subtitle" style="text-align: center; margin: 0 auto;">Отправьте ответ на email до 22 июля</p>
             </div>
-            <form class="rsvp-form" id="rsvpForm" novalidate>
+
+            <div class="rsvp-form" style="max-width: 600px; margin: 0 auto;">
+
+                <!-- Имя -->
                 <div class="form-group">
-                    <label for="name">Ваше имя и фамилия *</label>
-                    <input type="text" id="name" placeholder="Иван Петров" required>
-                    <span class="error-message" id="nameError">Пожалуйста, введите имя</span>
+                    <label for="rsvpName">Ваше имя и фамилия *</label>
+                    <input type="text" id="rsvpName" placeholder="Иван Петров" required>
                 </div>
+
+                <!-- Придёте? -->
                 <div class="form-group">
                     <label>Вы придёте? *</label>
                     <div class="radio-group">
                         <div class="radio-option">
-                            <input type="radio" name="attending" id="yes" value="yes" checked>
-                            <label for="yes">&#127881; Приду!</label>
+                            <input type="radio" name="rsvpAttending" id="rsvpYes" value="да" checked>
+                            <label for="rsvpYes">&#127881; Приду!</label>
                         </div>
                         <div class="radio-option">
-                            <input type="radio" name="attending" id="no" value="no">
-                            <label for="no">&#128532; Не смогу</label>
+                            <input type="radio" name="rsvpAttending" id="rsvpNo" value="нет">
+                            <label for="rsvpNo">&#128532; Не смогу</label>
                         </div>
                     </div>
                 </div>
-                <div class="form-group" id="peopleGroup">
-                    <label for="people">Сколько человек? *</label>
-                    <select id="people" required>
+
+                <!-- Количество -->
+                <div class="form-group" id="rsvpPeopleGroup">
+                    <label for="rsvpPeople">Сколько человек? *</label>
+                    <select id="rsvpPeople" required>
                         <option value="">Выберите...</option>
                         <option value="1">1 человек</option>
                         <option value="2">2 человека</option>
@@ -961,30 +968,27 @@
                         <option value="4">4 человека</option>
                         <option value="5">5 и более</option>
                     </select>
-                    <span class="error-message" id="peopleError">Выберите количество гостей</span>
                 </div>
+
+                <!-- Комментарий -->
                 <div class="form-group">
-                    <label for="comments">Комментарий (аллергии, предпочтения в еде)</label>
-                    <textarea id="comments" rows="3" placeholder="Например: аллергия на орехи, вегетарианец, не ем баранину..."></textarea>
+                    <label for="rsvpComments">Комментарий (аллергии, предпочтения)</label>
+                    <textarea id="rsvpComments" rows="3" placeholder="Например: аллергия на орехи, вегетарианец..."></textarea>
                 </div>
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <span class="spinner"></span>
-                    <span class="btn-text">Отправить ответ</span>
+
+                <!-- Кнопка отправки -->
+                <button type="button" class="btn-submit" id="rsvpSendBtn" onclick="sendRsvpEmail()">
+                    <span class="btn-text">&#9993; Отправить ответ на email</span>
                 </button>
-                <div class="rsvp-note">
-                    &#128161; <strong>Важно:</strong> Вечер проходит на открытом воздухе — возьмите тёплую кофту, плед и удобную обувь. Также пригодится средство от комаров.
+
+                <div class="rsvp-note" style="margin-top: 30px;">
+                    &#128161; <strong>Важно:</strong> Нажатие откроет ваш почтовый клиент (Gmail, Mail, Outlook) с готовым письмом. Просто нажмите «Отправить»!<br><br>
+                    Если почта не открылась — скопируйте текст и отправьте вручную на <strong id="emailDisplay">Vladislavobychev@yandex.ru</strong>
                 </div>
-            </form>
-            <div class="success-state" id="successState">
-                <div class="success-icon">&#127881;</div>
-                <h3>Отлично!</h3>
-                <p>Ваш ответ отправлен. Ждём вас в этот уютный вечер!<br>25 июля, дача в Бекетово Парк</p>
-                <div class="success-summary" id="summary"></div>
+
             </div>
         </div>
-    </section>
-
-    <!-- FOOTER -->
+    </section><!-- FOOTER -->
     <footer>
         <p>С любовью, семья Обычевых <span class="heart">&#10084;&#65039;</span></p>
         <p style="margin-top: 10px; opacity: 0.5;">25 июля 2026 · Курортный посёлок Бекетово Парк · Уютный вечер у костра</p>
@@ -1299,156 +1303,84 @@ let currentLightboxIndex = 0;
             setTimeout(() => { container.innerHTML = ''; }, 4000);
         }
 
-        // ==================== RSVP FORM ====================
-        document.querySelectorAll('input[name="attending"]').forEach(radio => {
+        // ==================== RSVP EMAIL FORM ====================
+
+        // Показ/скрытие поля "Количество" в зависимости от ответа
+        document.querySelectorAll('input[name="rsvpAttending"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                const isComing = this.value === 'yes';
-                const peopleGroup = document.getElementById('peopleGroup');
-
-                peopleGroup.style.display = isComing ? 'block' : 'none';
-
-                // Clear errors
-                document.getElementById('name').classList.remove('error');
-                document.getElementById('nameError').classList.remove('show');
-                document.getElementById('people').classList.remove('error');
-                document.getElementById('peopleError').classList.remove('show');
+                const peopleGroup = document.getElementById('rsvpPeopleGroup');
+                peopleGroup.style.display = this.value === 'да' ? 'block' : 'none';
             });
         });
 
-        function validateForm() {
-            let isValid = true;
-            const name = document.getElementById('name');
-            const nameError = document.getElementById('nameError');
-            const attending = document.querySelector('input[name="attending"]:checked').value;
+        function sendRsvpEmail() {
+            const name = document.getElementById('rsvpName').value.trim();
+            const attending = document.querySelector('input[name="rsvpAttending"]:checked').value;
+            const people = document.getElementById('rsvpPeople').value;
+            const comments = document.getElementById('rsvpComments').value.trim();
 
-            // Name validation
-            if (!name.value.trim()) {
-                name.classList.add('error');
-                nameError.classList.add('show');
-                isValid = false;
-            } else {
-                name.classList.remove('error');
-                nameError.classList.remove('show');
-            }
-
-            // People validation (only if coming)
-            if (attending === 'yes') {
-                const people = document.getElementById('people');
-                const peopleError = document.getElementById('peopleError');
-                if (!people.value) {
-                    people.classList.add('error');
-                    peopleError.classList.add('show');
-                    isValid = false;
-                } else {
-                    people.classList.remove('error');
-                    peopleError.classList.remove('show');
-                }
-            }
-
-            return isValid;
-        }
-
-        document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (!validateForm()) {
-                showToast('Пожалуйста, заполните обязательные поля', 'error');
+            // Валидация
+            if (!name) {
+                showToast('Пожалуйста, введите имя', 'error');
+                document.getElementById('rsvpName').focus();
                 return;
             }
 
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-
-            const name = document.getElementById('name').value.trim();
-            const attending = document.querySelector('input[name="attending"]:checked').value;
-            const people = document.getElementById('people').value;
-            const comments = document.getElementById('comments').value || 'нет';
-
-            const message = "&#127881; Новый ответ на приглашение!\n\n" +
-                "&#128100; Имя: " + name + "\n" +
-                "&#9989; Придёт: " + (attending === 'yes' ? 'Да &#127881;' : 'Не смогу &#128532;') + "\n" +
-                "&#128101; Количество: " + people + " чел.\n" +
-                "&#128118; Дети: " + children + "\n" +
-                "&#9978; Ночёвка: " + (stay === 'yes' ? 'Да &#9978;' : 'Нет &#127968;') + "\n" +
-                "&#128172; Комментарий: " + comments + "\n\n" +
-                "&#128197; Дата: 25 июля 2026";
-
-            const BOT_TOKEN = '8886038279:AAHn-Kt1tMRO_Zw6SL6c6o5vMN3rD9drGh8';
-            const CHAT_ID = '717551702';
-
-            try {
-                let data = { ok: false };
-
-                // Метод 1: fetch с no-cors (запрос уйдёт, но ответа не получим)
-                try {
-                    await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'HTML' })
-                    });
-                    // При no-cors мы не можем прочитать ответ, но запрос ушёл
-                    data = { ok: true };
-                } catch (e) {
-                    console.log('Fetch error:', e);
-                }
-
-                // Метод 2: резервный GET через создание изображения (обход CORS)
-                if (!data.ok) {
-                    try {
-                        const backupUrl = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(message) + '&parse_mode=HTML';
-                        const img = new Image();
-                        img.src = backupUrl;
-                        data = { ok: true };
-                    } catch (e) {
-                        console.log('Backup error:', e);
-                    }
-                }
-
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-
-                // При no-cors мы не знаем точно, успешно ли отправилось,
-                // но считаем что да (запрос точно ушёл)
-                document.getElementById('rsvpForm').style.display = 'none';
-                document.getElementById('successState').classList.add('show');
-                launchConfetti();
-
-                    const summaryHTML = '<h4 style="margin-bottom: 15px; color: var(--accent);">&#128203; Ваш ответ:</h4>' +
-                        '<div class="summary-row"><span class="summary-label">Имя:</span><span class="summary-value">' + escapeHtml(name) + '</span></div>' +
-                        '<div class="summary-row"><span class="summary-label">Придёт:</span><span class="summary-value">' + (attending === 'yes' ? 'Да &#127881;' : 'Не смогу &#128532;') + '</span></div>' +
-                        (attending === 'yes' ? '<div class="summary-row"><span class="summary-label">Количество:</span><span class="summary-value">' + people + ' чел.</span></div>' : '') +
-                        (comments !== 'нет' ? '<div class="summary-row"><span class="summary-label">Комментарий:</span><span class="summary-value">' + escapeHtml(comments) + '</span></div>' : '');
-                    document.getElementById('summary').innerHTML = summaryHTML;
-
-                    showToast('Ответ успешно отправлен!', 'success');
-                // Отправка считается успешной (no-cors mode)
-            } catch (error) {
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-                console.error('Error:', error);
-                showToast('Ошибка сети. Проверьте подключение.', 'error');
+            if (attending === 'да' && !people) {
+                showToast('Выберите количество гостей', 'error');
+                document.getElementById('rsvpPeople').focus();
+                return;
             }
-        });
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+            // Формируем письмо
+            const subject = '&#127881; Ответ на приглашение — День Рождения Анны (25 июля)';
+
+            let body = 'Дорогая Анна и Влад!
+
+';
+            body += 'Имя: ' + name + '
+';
+            body += 'Приду: ' + (attending === 'да' ? 'Да &#127881;' : 'К сожалению, не смогу &#128532;') + '
+';
+
+            if (attending === 'да') {
+                body += 'Количество человек: ' + people + '
+';
+            }
+
+            if (comments) {
+                body += '
+Комментарий:
+' + comments + '
+';
+            }
+
+            body += '
+---
+';
+            body += 'С уважением,
+' + name + '
+';
+            body += 'Дата ответа: ' + new Date().toLocaleDateString('ru-RU') + '
+';
+
+            // Кодируем для URL
+            const encodedSubject = encodeURIComponent(subject.replace(/&#\d+;/g, ''));
+            const encodedBody = encodeURIComponent(body.replace(/&#\d+;/g, ''));
+
+            // Открываем почтовый клиент
+            const mailtoLink = 'mailto:Vladislavobychev@yandex.ru?subject=' + encodedSubject + '&body=' + encodedBody;
+
+            // Показываем успех
+            showToast('Открываю почтовый клиент...', 'success');
+
+            // Небольшая задержка, чтобы toast успел показаться
+            setTimeout(() => {
+                window.location.href = mailtoLink;
+            }, 500);
         }
 
-        // Clear error on input
-        document.getElementById('name').addEventListener('input', function() {
-            this.classList.remove('error');
-            document.getElementById('nameError').classList.remove('show');
-        });
-        document.getElementById('people').addEventListener('change', function() {
-            this.classList.remove('error');
-            document.getElementById('peopleError').classList.remove('show');
-        });
-
-        // ==================== SMOOTH SCROLL FOR ANCHORS ====================
+        // ==================== SMOOTH SCROLL FOR ANCHORS ====================// ==================== SMOOTH SCROLL FOR ANCHORS ====================
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
